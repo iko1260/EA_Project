@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Homepage | AmongUs</title>
+    <link href="../amongus/src/index.css" rel="stylesheet">
+</head>
+<body class="index-background">
+<div class="centered-input">
+    <label>
+        <input type="text" id="username" maxlength="10" placeholder="username">
+    </label>
+    <button onclick="redirectToGame()">PLAY</button>
+</div>
+<script>
+    function redirectToGame() {
+        var username = document.getElementById('username').value;
+        var gameUrl = 'http://localhost:3000/';
+        if (username) {
+            gameUrl += '?username=' + encodeURIComponent(username);
+        }
+        window.location.href = gameUrl;
+    }
+</script>
+</body>
+</html>

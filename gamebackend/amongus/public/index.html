@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple HTML with React Player</title>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+<script type="text/babel">
+  const { useState, useEffect } = React;
+
+  const Player = () => {
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    let socket; // Definieren Sie socket außerhalb von useEffect
+
+    useEffect(() => {
+      // WebSocket-Verbindung initialisieren
+      socket = new WebSocket('ws://localhost:3000');
+
+      socket.onopen = function(e) {
+        console.log("[open] Verbindung hergestellt");
+        socket.send("Hallo Server!");
+      };
+
+      socket.onmessage = function(event) {
+        console.log(`[message] Daten empfangen vom Server: ${event.data}`);
+        // Hier könnten Sie die Position basierend auf der Nachricht des Servers aktualisieren
+      };
+
+      socket.onclose = function(event) {
+        if (event.wasClean) {
+          console.log(`[close] Verbindung geschlossen, Code=${event.code} Grund=${event.reason}`);
+        } else {
+          console.log('[close] Verbindung abgebrochen');
+        }
+      };
+
+      socket.onerror = function(error) {
+        console.log(`[error] ${error.message}`);
+      };
+
+      return () => {
+        socket.close();
+      };
+    }, []);
+
+    const move = (direction) => {
+      let newPos = { ...position };
+      switch (direction) {
+        case 'left':
+          newPos.x -= 1;
+          break;
+        case 'right':
+          newPos.x += 1;
+          break;
+        case 'up':
+          newPos.y -= 1;
+          break;
+        case 'down':
+          newPos.y += 1;
+          break;
+        default:
+          break;
+      }
+      console.log("New position:", newPos);
+      // Hier sollten Sie die neue Position an den Server senden
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(newPos)); // Senden der neuen Position als String
+      }
+    };
+
+    return (
+            <div
+                    className="player"
+                    style={{ position: 'absolute', left: position.x * 50, top: position.y * 50, width: 50, height: 50, backgroundColor: 'blue' }}>
+            </div>
+    );
+  };
+
+  ReactDOM.render(<Player />, document.getElementById('root'));
+</script>
+</body>
+</html>
